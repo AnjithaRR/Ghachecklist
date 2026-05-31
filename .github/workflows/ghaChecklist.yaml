@@ -1,4 +1,4 @@
-name: Pre-Merge Checklist
+name: Pre-Merge Checklist Validation
 
 on:
   pull_request:
