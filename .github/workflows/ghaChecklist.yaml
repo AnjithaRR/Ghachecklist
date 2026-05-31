@@ -12,19 +12,19 @@ jobs:
         run: |
           BODY="${{ github.event.pull_request.body }}"
 
-          REQUIRED_ITEMS=(
-            "Tested for regression and screenshot attached"
-            "PR raised in DHP env repo before moving to prod"
-            "CR created for Stage/PROD"
-            "Snyk check passed and screenshot attached"
-          )
+          REQUIRED_ITEMS=("Tested for regression and screenshot attached" \
+            "PR raised in DHP env repo before moving to prod" \
+            "CR created for Stage/PROD" \
+            "Snyk check passed and screenshot attached")
 
           MISSING=false
           for ITEM in "${REQUIRED_ITEMS[@]}"; do
-            if ! grep -q "\- \[x\]
+            if ! grep -q "\- 
 
-              $ITEM" <<< "$BODY"; then
-              echo "❌ Missing: $ITEM"
+          \[x\]
+
+           $ITEM" <<< "$BODY"; then
+              echo "❌ Missing or unchecked: $ITEM"
               MISSING=true
             else
               echo "✅ $ITEM"
