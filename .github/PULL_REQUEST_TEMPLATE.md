@@ -1,6 +1,21 @@
-## Pre-Merge Checklist
+## Description
+Please include a summary of the changes and the related issue. 
 
-- [ ] Tested for regression and screenshot attached  
-- [ ] PR raised in DHP env repo before moving to prod  
-- [ ] CR created for Stage/PROD  
-- [ ] Snyk check passed and screenshot attached
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Documentation update
+ 
+## Checklist
+My code follows the style guidelines of this project
+check this to pass the merge validation
+- [ ] I have performed a self-review of my code
+- [ ] I have documented my changes
+- [ ] I have added tests that prove my fix is effective or my feature works
+- [ ] New and existing unit tests pass locally
+- [ ] Synk testing done and screenshot attached
+- [ ] Regression passed
+- [ ] All unit test cases passed
+
+ ## attach screenshots andf test
+ add a screenshot of the build
