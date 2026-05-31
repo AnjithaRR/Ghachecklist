@@ -20,10 +20,9 @@ jobs:
           MISSING=false
           for ITEM in "${REQUIRED_ITEMS[@]}"; do
             if ! grep -q "\- 
+            \[x\]
 
-          \[x\]
-
-           $ITEM" <<< "$BODY"; then
+              $ITEM" <<< "$BODY"; then
               echo "❌ Missing or unchecked: $ITEM"
               MISSING=true
             else
