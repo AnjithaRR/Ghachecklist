@@ -1,0 +1,37 @@
+name: Pre-Merge Checklist
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  checklist-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR description checklist
+        run: |
+          BODY="${{ github.event.pull_request.body }}"
+
+          REQUIRED_ITEMS=(
+            "Tested for regression and screenshot attached"
+            "PR raised in DHP env repo before moving to prod"
+            "CR created for Stage/PROD"
+            "Snyk check passed and screenshot attached"
+          )
+
+          MISSING=false
+          for ITEM in "${REQUIRED_ITEMS[@]}"; do
+            if ! grep -q "\- \[x\]
+
+              $ITEM" <<< "$BODY"; then
+              echo "❌ Missing: $ITEM"
+              MISSING=true
+            else
+              echo "✅ $ITEM"
+            fi
+          done
+
+          if [ "$MISSING" = true ]; then
+            echo "Checklist validation failed. Please update PR description."
+            exit 1
+          fi
