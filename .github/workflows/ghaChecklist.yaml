@@ -1,36 +1,68 @@
-name: Pre-Merge Checklist Validation
+name: PR Checklist Enforcement with Progress
 
 on:
   pull_request:
     types: [opened, edited, synchronize]
 
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
-  checklist-validation:
+  checklist-enforce:
     runs-on: ubuntu-latest
     steps:
-      - name: Validate PR description checklist
-        run: |
-          BODY="${{ github.event.pull_request.body }}"
+      - name: Validate PR checklist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || "";
+            const requiredItems = [
+              "- [ ] I have performed a self-review of my code",
+              "- [ ] I have documented my changes",
+              "- [ ] I have added tests that prove my fix is effective or my feature works",
+              "- [ ] New and existing unit tests pass locally",
+              "- [ ] Synk testing done and screenshot attached",
+              "- [ ] Regression passed",
+              "- [ ] All unit test cases passed"
+            ];
 
-          REQUIRED_ITEMS=("Tested for regression and screenshot attached" \
-            "PR raised in DHP env repo before moving to prod" \
-            "CR created for Stage/PROD" \
-            "Snyk check passed and screenshot attached")
+            // Count checked items
+            let checkedCount = 0;
+            let missing = [];
 
-          MISSING=false
-          for ITEM in "${REQUIRED_ITEMS[@]}"; do
-            if ! grep -q "\- 
-            \[x\]
+            for (const item of requiredItems) {
+              const checkedVersion = item.replace("[ ]", "[x]");
+              if (body.includes(checkedVersion)) {
+                checkedCount++;
+              } else {
+                missing.push(item);
+              }
+            }
 
-              $ITEM" <<< "$BODY"; then
-              echo "❌ Missing or unchecked: $ITEM"
-              MISSING=true
-            else
-              echo "✅ $ITEM"
-            fi
-          done
+            const total = requiredItems.length;
+            const issue_number = context.payload.pull_request.number;
 
-          if [ "$MISSING" = true ]; then
-            echo "Checklist validation failed. Please update PR description."
-            exit 1
-          fi
+            if (missing.length > 0) {
+              const message = `⚠️ Checklist progress: ${checkedCount}/${total} items checked.\n\nMissing:\n${missing.join("\n")}\n\nPlease update the PR description to tick all required items.`;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                body: message
+              });
+
+              core.setFailed("PR checklist is incomplete.");
+            } else {
+              const message = `✅ All ${total} checklist items are completed! Great job.`;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                body: message
+              });
+
+              core.info("All checklist items are completed.");
+            }
